@@ -1,8 +1,14 @@
 import prisma from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const material_id = searchParams.get('material_id')
+
+    const where = material_id ? { material_id: parseInt(material_id) } : {}
+
     const flashcards = await prisma.flashcard.findMany({
+      where,
       include: {
         material: true
       }
