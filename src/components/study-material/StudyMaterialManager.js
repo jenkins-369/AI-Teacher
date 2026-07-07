@@ -290,7 +290,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                       Generate Assignment
                     </Button>
                     <Button
-                      variant="secondary"
+                      variant={error ? "info" : "secondary"}
                       onClick={() => {
                         setSelectedMaterial(material);
                         setShowBulkChunks(true);
