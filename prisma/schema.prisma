@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Course {
+  id          Int            @id @default(autoincrement())
+  title       String         @db.VarChar(255)
+  description String?
+  category    String?        @db.VarChar(100)
+  difficulty  String?        @db.VarChar(20)
+  created_at  DateTime       @default(now())
+  studyMaterials StudyMaterial[]
+  assignments    Assignment[]
+  quizAttempts   QuizAttempt[]
+  studentProgress StudentProgress[]
+
+  @@map("courses")
+}
+
+model StudyMaterial {
+  id          Int             @id @default(autoincrement())
+  course_id   Int
+  title       String          @db.VarChar(255)
+  file_url    String?
+  file_type   String?         @db.VarChar(30)
+  pages       Int?
+  uploaded_at DateTime        @default(now())
+  course      Course          @relation(fields: [course_id], references: [id])
+  chunks      DocumentChunk[]
+  summaries   AiSummary[]
+  flashcards  Flashcard[]
+  quizzes     Quiz[]
+  chatHistory ChatHistory[]
+
+  @@map("study_materials")
+}
+
+model DocumentChunk {
+  id           Int           @id @default(autoincrement())
+  material_id  Int
+  chunk_text   String?
+  page_number  Int?
+  embedding_id String?       @db.VarChar(100)
+  material     StudyMaterial @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@map("document_chunks")
+}
+
+model AiSummary {
+  id          Int           @id @default(autoincrement())
+  material_id Int
+  summary     String?
+  generated_at DateTime     @default(now())
+  material    StudyMaterial @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@map("ai_summaries")
+}
+
+model Flashcard {
+  id          Int           @id @default(autoincrement())
+  material_id Int
+  question    String?
+  answer      String?
+  difficulty  String?       @db.VarChar(20)
+  material    StudyMaterial @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@map("flashcards")
+}
+
+model Quiz {
+  id              Int             @id @default(autoincrement())
+  material_id Int
+  title       String          @db.VarChar(255)
+  created_at  DateTime        @default(now())
+  material    StudyMaterial   @relation(fields: [material_id], references: [id], onDelete: Cascade)
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id           Int    @id @default(autoincrement())
+  quiz_id      Int
+  question     String?
+  option_a     String?
+  option_b     String?
+  option_c     String?
+  option_d     String?
+  correct_option String? @db.Char(1)
+  explanation  String?
+  quiz         Quiz   @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id              Int       @id @default(autoincrement())
+  course_id       Int
+  quiz_id         Int
+  score           Int?
+  total_questions Int?
+  completed_at    DateTime  @default(now())
+  course          Course    @relation(fields: [course_id], references: [id])
+  quiz            Quiz      @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  @@map("quiz_attempts")
+}
+
+model ChatHistory {
+  id          Int           @id @default(autoincrement())
+  material_id Int
+  user_message String?
+  ai_response  String?
+  created_at   DateTime  @default(now())
+  material     StudyMaterial @relation(fields: [material_id], references: [id], onDelete: Cascade)
+
+  @@map("chat_history")
+}
+
+model Assignment {
+  id           Int       @id @default(autoincrement())
+  course_id    Int
+  title        String?   @db.VarChar(255)
+  instructions String?
+  due_date     DateTime?
+  course       Course    @relation(fields: [course_id], references: [id])
+  submissions  AssignmentSubmission[]
+
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id             Int       @id @default(autoincrement())
+  assignment_id  Int
+  submission_text String
+  ai_feedback    String?
+  score          Int?
+  submitted_at   DateTime  @default(now())
+  assignment     Assignment @relation(fields: [assignment_id], references: [id], onDelete: Cascade)
+
+  @@map("assignment_submissions")
+}
+
+model StudentProgress {
+  id                Int       @id @default(autoincrement())
+  course_id         Int
+  completion_percent  Decimal?  @db.Decimal(5, 2)
+  quizzes_completed   Int?
+  last_activity       DateTime? @default(now())
+  course              Course    @relation(fields: [course_id], references: [id])
+
+  @@unique([course_id])
+  @@map("student_progress")
+}
+
