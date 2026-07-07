@@ -212,7 +212,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
       fetchMaterials();
       fetchCourse(courseId);
     } catch (err) {
-      setError(err.message);
+      setError("Please add document chunks first.");
     } finally {
       setGenerating(false);
     }
@@ -263,18 +263,14 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                   <div className="mt-2 space-x-2">
                     <Button
                       variant="secondary"
-                      onClick={() =>
-                        handleGenerate(material.id, "summary")
-                      }
+                      onClick={() => handleGenerate(material.id, "summary")}
                       disabled={generating}
                     >
                       Generate Summary
                     </Button>
                     <Button
                       variant="secondary"
-                      onClick={() =>
-                        handleGenerate(material.id, "flashcards")
-                      }
+                      onClick={() => handleGenerate(material.id, "flashcards")}
                       disabled={generating}
                     >
                       Generate Flashcards
@@ -288,9 +284,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                     </Button>
                     <Button
                       variant="secondary"
-                      onClick={() =>
-                        handleGenerate(material.id, "assignment")
-                      }
+                      onClick={() => handleGenerate(material.id, "assignment")}
                       disabled={generating}
                     >
                       Generate Assignment
@@ -328,16 +322,12 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                 </h5>
                 {materialChunks.length === 0 ? (
                   <p className="text-sm text-gray-500">
-                    No chunks yet. Click &quot;Add Chunks&quot; to add
-                    content.
+                    No chunks yet. Click &quot;Add Chunks&quot; to add content.
                   </p>
                 ) : (
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {materialChunks.map((chunk) => (
-                      <div
-                        key={chunk.id}
-                        className="p-3 bg-gray-50 rounded-lg"
-                      >
+                      <div key={chunk.id} className="p-3 bg-gray-50 rounded-lg">
                         {editingChunkId === chunk.id ? (
                           <form
                             onSubmit={(e) => {
@@ -390,9 +380,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                                 <Button
                                   variant="secondary"
                                   size="sm"
-                                  onClick={() =>
-                                    startInlineEdit(chunk)
-                                  }
+                                  onClick={() => startInlineEdit(chunk)}
                                 >
                                   Edit
                                 </Button>
@@ -400,10 +388,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
                                   variant="danger"
                                   size="sm"
                                   onClick={() =>
-                                    handleDeleteChunk(
-                                      material.id,
-                                      chunk.id
-                                    )
+                                    handleDeleteChunk(material.id, chunk.id)
                                   }
                                 >
                                   Delete
@@ -425,9 +410,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
       {showForm && (
         <Modal
           isOpen={showForm}
-          title={
-            editingMaterial ? "Edit Study Material" : "Add Study Material"
-          }
+          title={editingMaterial ? "Edit Study Material" : "Add Study Material"}
           onClose={() => {
             setShowForm(false);
             setEditingMaterial(null);
@@ -490,9 +473,7 @@ export default function StudyMaterialManager({ courseId, fetchCourse }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Material
               </label>
-              <p className="text-sm text-gray-600">
-                {selectedMaterial?.title}
-              </p>
+              <p className="text-sm text-gray-600">{selectedMaterial?.title}</p>
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
