@@ -1,9 +1,44 @@
-import { Suspense } from 'react'
+"use client";
+
+import { useState, useEffect } from 'react'
 import { LoadingSpinner, Card } from '@/components/ui'
 import { quizAttemptsApi } from '@/services/api'
 
-export default async function QuizAttemptsPage() {
-  const attempts = await quizAttemptsApi.getAll()
+export default function QuizAttemptsPage() {
+  const [attempts, setAttempts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchAttempts = async () => {
+      try {
+        const data = await quizAttemptsApi.getAll()
+        setAttempts(data)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAttempts()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <LoadingSpinner />
+        <p className="mt-4 text-gray-500 text-sm">Loading quiz attempts...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">{error}</p>
+      </div>
+    )
+  }
 
   return (
     <div>

@@ -1,19 +1,38 @@
+"use client";
+
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ChatInterface from '@/components/chat/ChatInterface'
 import { studyMaterialsApi } from '@/services/api'
 import { BookOpen, MessageSquare, Sparkles } from 'lucide-react'
 
-export default async function ChatPage({ searchParams }) {
-  const params = await searchParams
-  const materialId = params?.material_id
+function ChatContent() {
+  const searchParams = useSearchParams()
+  const materialId = searchParams.get('material_id')
+  const [initialMaterialId, setInitialMaterialId] = useState(materialId)
+  const [loading, setLoading] = useState(true)
 
-  let initialMaterialId = materialId
-  if (!initialMaterialId) {
-    try {
-      const materials = await studyMaterialsApi.getAll()
-      initialMaterialId = materials[0]?.id
-    } catch {
-      initialMaterialId = null
+  useEffect(() => {
+    const fetchMaterial = async () => {
+      if (initialMaterialId) return
+      try {
+        const materials = await studyMaterialsApi.getAll()
+        setInitialMaterialId(materials[0]?.id?.toString())
+      } catch {
+        setInitialMaterialId(null)
+      } finally {
+        setLoading(false)
+      }
     }
+    fetchMaterial()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-gray-500 text-sm">Loading chat...</p>
+      </div>
+    )
   }
 
   return (
@@ -30,7 +49,7 @@ export default async function ChatPage({ searchParams }) {
         </div>
       </div>
       {initialMaterialId ? (
-        <ChatInterface materialId={initialMaterialId.toString()} />
+        <ChatInterface materialId={initialMaterialId} />
       ) : (
         <div className="text-center py-16">
           <div className="bg-gray-50 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
@@ -45,5 +64,17 @@ export default async function ChatPage({ searchParams }) {
         </div>
       )}
     </div>
+  )
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center py-20">
+        <p className="text-gray-500 text-sm">Loading chat...</p>
+      </div>
+    }>
+      <ChatContent />
+    </Suspense>
   )
 }
